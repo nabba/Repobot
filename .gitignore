@@ -5,3 +5,4 @@ __pycache__
 # Never commit service account keys
 *-firebase-adminsdk-*.json
 .firebase/
+*.pem

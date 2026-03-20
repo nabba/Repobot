@@ -16,7 +16,8 @@ from repo_scanner import scan_repo
 @dataclass
 class AnalysisJob:
     job_id: str
-    repo_path: str
+    repo_path: str  # display path (URL or local)
+    scan_path: str = ""  # actual filesystem path to scan
     status: str = "scanning"
     started_at: float = field(default_factory=time.time)
     finished_at: float | None = None
@@ -74,9 +75,9 @@ async def _notify(job_id: str, event: dict):
         await q.put(event)
 
 
-async def start_analysis(repo_path: str) -> str:
+async def start_analysis(scan_path: str, display_path: str | None = None) -> str:
     job_id = uuid.uuid4().hex[:8]
-    job = AnalysisJob(job_id=job_id, repo_path=repo_path)
+    job = AnalysisJob(job_id=job_id, repo_path=display_path or scan_path, scan_path=scan_path)
 
     # Initialize agent results
     for name in AGENTS:
@@ -99,7 +100,7 @@ async def _run_analysis(job: AnalysisJob):
     # Phase 1: Scan repo
     try:
         await _notify(job_id, {"type": "status", "status": "scanning"})
-        scan = scan_repo(job.repo_path)
+        scan = scan_repo(job.scan_path)
         context = scan["context"]
         job.repo_stats = scan["stats"]
         await _notify(job_id, {

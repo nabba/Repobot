@@ -6,12 +6,16 @@ import re
 
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
-# High-quality free models on OpenRouter (2025-2026 era)
+# High-quality free models on OpenRouter (verified March 2026)
 MODELS = [
-    "deepseek/deepseek-chat-v3-0324:free",
+    "nvidia/nemotron-3-super-120b-a12b:free",
+    "nousresearch/hermes-3-llama-3.1-405b:free",
+    "meta-llama/llama-3.3-70b-instruct:free",
     "google/gemma-3-27b-it:free",
-    "meta-llama/llama-4-maverick:free",
-    "qwen/qwen3-235b-a22b:free",
+    "qwen/qwen3-coder:free",
+    "minimax/minimax-m2.5:free",
+    "mistralai/mistral-small-3.1-24b-instruct:free",
+    "openai/gpt-oss-120b:free",
 ]
 
 _model_idx = 0

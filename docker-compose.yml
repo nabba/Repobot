@@ -9,4 +9,7 @@ services:
     volumes:
       # Mount host filesystem read-only so the scanner can access repos
       - /:/host:ro
+      # SSL certs for HTTPS
+      - ./backend/cert.pem:/app/backend/cert.pem:ro
+      - ./backend/key.pem:/app/backend/key.pem:ro
     restart: unless-stopped

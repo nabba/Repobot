@@ -104,7 +104,7 @@
     <button onclick="saveApi()" style="background:var(--surface);border:1px solid var(--border);color:var(--text)">Set Backend</button>
   </div>
   <div class="input-row">
-    <input type="text" id="repoPath" placeholder="Absolute path to repository, e.g. /Users/you/project" />
+    <input type="text" id="repoPath" placeholder="GitHub URL or local path, e.g. https://github.com/user/repo" />
     <button id="analyzeBtn" onclick="startAnalysis()">Analyze</button>
   </div>
 
@@ -117,11 +117,18 @@
 
 <script>
 // Backend URL — empty means same-origin (local dev), set for remote hosting
-let API = localStorage.getItem('repobot_api') || '';
+const DEFAULT_API = 'https://repobot-513190142794.europe-north1.run.app';
+let API = localStorage.getItem('repobot_api') || DEFAULT_API;
 let jobs = {};
 
 // Populate saved backend URL
 document.addEventListener('DOMContentLoaded', () => {
+  // Clear stale localhost values
+  const saved = localStorage.getItem('repobot_api');
+  if (saved && saved.includes('localhost')) {
+    localStorage.removeItem('repobot_api');
+    API = DEFAULT_API;
+  }
   document.getElementById('apiUrl').value = API;
 });
 function saveApi() {
@@ -140,18 +147,20 @@ async function startAnalysis() {
   btn.disabled = true;
   btn.textContent = 'Starting...';
 
+  const url = `${API}/api/analyze?repo_path=${encodeURIComponent(path)}`;
   try {
-    const res = await fetch(`${API}/api/analyze?repo_path=${encodeURIComponent(path)}`, { method: 'POST' });
+    const res = await fetch(url, { method: 'POST', mode: 'cors' });
     const data = await res.json();
     if (data.error) { alert(data.error); return; }
     connectWebSocket(data.job_id, path);
-  } catch(e) { alert('Failed to start: ' + e.message); }
+  } catch(e) { alert('Failed to start: ' + e.message + '\nAPI URL: ' + url); }
   finally { btn.disabled = false; btn.textContent = 'Analyze'; }
 }
 
 function connectWebSocket(jobId, repoPath) {
-  const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-  const ws = new WebSocket(`${wsProto}//${location.host}/ws/${jobId}`);
+  const apiHost = API ? API.replace(/^https?:\/\//, '') : location.host;
+  const wsProto = API && API.startsWith('https') ? 'wss:' : 'ws:';
+  const ws = new WebSocket(`${wsProto}//${apiHost}/ws/${jobId}`);
 
   jobs[jobId] = {
     id: jobId, repo_path: repoPath, status: 'scanning',
