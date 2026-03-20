@@ -1,0 +1,7 @@
+.venv
+__pycache__
+*.pyc
+*.json.bak
+# Never commit service account keys
+*-firebase-adminsdk-*.json
+.firebase/

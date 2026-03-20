@@ -99,6 +99,10 @@
   <h1><span>RepoBot</span> Analyzer</h1>
   <p class="subtitle">Multi-agent repository analysis powered by free OpenRouter models</p>
 
+  <div class="input-row" style="margin-bottom:10px">
+    <input type="text" id="apiUrl" placeholder="Backend URL, e.g. http://your-server:8877" style="flex:0.6" />
+    <button onclick="saveApi()" style="background:var(--surface);border:1px solid var(--border);color:var(--text)">Set Backend</button>
+  </div>
   <div class="input-row">
     <input type="text" id="repoPath" placeholder="Absolute path to repository, e.g. /Users/you/project" />
     <button id="analyzeBtn" onclick="startAnalysis()">Analyze</button>
@@ -112,8 +116,20 @@
 </div>
 
 <script>
-const API = '';
+// Backend URL — empty means same-origin (local dev), set for remote hosting
+let API = localStorage.getItem('repobot_api') || '';
 let jobs = {};
+
+// Populate saved backend URL
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('apiUrl').value = API;
+});
+function saveApi() {
+  const url = document.getElementById('apiUrl').value.trim().replace(/\/+$/, '');
+  localStorage.setItem('repobot_api', url);
+  API = url;
+  alert(url ? 'Backend set to: ' + url : 'Backend set to same-origin (local)');
+}
 
 async function startAnalysis() {
   const input = document.getElementById('repoPath');
