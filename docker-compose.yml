@@ -1,0 +1,12 @@
+services:
+  repobot:
+    build: .
+    ports:
+      - "8877:8877"
+    environment:
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - HOST_MOUNT=/host
+    volumes:
+      # Mount host filesystem read-only so the scanner can access repos
+      - /:/host:ro
+    restart: unless-stopped

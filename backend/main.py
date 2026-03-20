@@ -32,11 +32,16 @@ async def index():
     return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
 
 
+HOST_MOUNT = os.environ.get("HOST_MOUNT", "")  # e.g. "/host" in Docker
+
+
 @app.post("/api/analyze")
 async def analyze(repo_path: str = Query(..., description="Absolute path to git repo")):
-    if not os.path.isdir(repo_path):
+    # In Docker, host filesystem is mounted at /host
+    scan_path = HOST_MOUNT + repo_path if HOST_MOUNT else repo_path
+    if not os.path.isdir(scan_path):
         return {"error": f"Directory not found: {repo_path}"}
-    job_id = await start_analysis(repo_path)
+    job_id = await start_analysis(scan_path)
     return {"job_id": job_id}
 
 
